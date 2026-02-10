@@ -1,0 +1,7 @@
+{
+  "name": "Tappo - NFC Solutions (Beta)",
+  "description": "Moderna platforma za upravljanje NFC tagovima za lokale, kafiće i restorane. Kreirajte digitalne menije, pratite ponude i događaje u realnom vremenu.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

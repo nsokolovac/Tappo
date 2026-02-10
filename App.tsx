@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
@@ -8,6 +8,9 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Pricing from './components/Pricing';
 import { AppView, BusinessProfile, User } from './types';
+
+const STORAGE_KEY_PROFILES = 'tappo_profiles_v1';
+const STORAGE_KEY_USER = 'tappo_user_v1';
 
 const calculateNextBillingDate = (cycle: string): string => {
   const now = new Date();
@@ -22,9 +25,32 @@ const calculateNextBillingDate = (cycle: string): string => {
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>('LANDING');
-  const [user, setUser] = useState<User | null>(null);
-  const [profiles, setProfiles] = useState<BusinessProfile[]>([]);
+  
+  // Inicijalizacija iz localStorage
+  const [user, setUser] = useState<User | null>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY_USER);
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  const [profiles, setProfiles] = useState<BusinessProfile[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY_PROFILES);
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+
+  // Sinhronizacija sa localStorage pri svakoj promeni
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_PROFILES, JSON.stringify(profiles));
+  }, [profiles]);
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(STORAGE_KEY_USER);
+    }
+  }, [user]);
 
   const handleLogin = (email: string) => {
     setUser({ email });
@@ -36,6 +62,8 @@ const App: React.FC = () => {
     setProfiles([]);
     setSelectedProfileId(null);
     setCurrentView('LANDING');
+    localStorage.removeItem(STORAGE_KEY_PROFILES);
+    localStorage.removeItem(STORAGE_KEY_USER);
   };
 
   const handleRegister = (data: any) => {

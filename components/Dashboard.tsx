@@ -4,7 +4,6 @@ import { BusinessProfile, AppView, MenuGroup, MenuItem, Offer, Event } from '../
 import { generateDescription } from '../services/geminiService';
 import { SUBSCRIPTION_OPTIONS } from '../constants';
 
-// Pomoćna funkcija za kompresiju slike
 const compressImage = (base64Str: string, maxWidth = 1200, maxHeight = 800): Promise<string> => {
   return new Promise((resolve) => {
     const img = new Image();
@@ -30,7 +29,7 @@ const compressImage = (base64Str: string, maxWidth = 1200, maxHeight = 800): Pro
       canvas.height = height;
       const ctx = canvas.getContext('2d');
       ctx?.drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL('image/jpeg', 0.7)); // Kompresija na 70% kvaliteta
+      resolve(canvas.toDataURL('image/jpeg', 0.7));
     };
   });
 };
@@ -121,8 +120,7 @@ const Dashboard: React.FC<DashboardProps> = ({
     if (!profile || isGenerating) return;
     setIsGenerating(true);
     try {
-      // Pass a fixed category "Lokal" as we removed it from profile
-      const desc = await generateDescription(profile.name, "Lokal");
+      const desc = await generateDescription(profile.name, "Poslovni objekat");
       if (desc) {
         setLocalDesc(desc);
         updateProfileField('description', desc);
@@ -225,7 +223,6 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 animate-in fade-in duration-500">
-      {/* Modal za editovanje stavki */}
       {editingItem && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
           <form onSubmit={saveItem} className="bg-white w-full max-w-lg rounded-[2.5rem] p-10 shadow-2xl">
@@ -259,7 +256,6 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
       )}
 
-      {/* Header Dashboard-a */}
       <div className="flex justify-between items-center mb-8">
         <button onClick={() => onSelectProfile(null)} className="text-gray-400 hover:text-indigo-600 font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
@@ -370,43 +366,19 @@ const Dashboard: React.FC<DashboardProps> = ({
           {activeTab === 'offers' && (
             <div className="space-y-10">
               <div className="flex justify-between items-center">
-                <h3 className="text-xl font-black text-gray-900 uppercase">Specijalne Ponude</h3>
+                <h3 className="text-xl font-black text-gray-900 uppercase">Ponude</h3>
                 <button onClick={() => setEditingItem({ type: 'offers', data: { title: '', description: '', discount: '' } })} className="bg-indigo-600 text-white px-5 py-2 rounded-xl font-black text-[10px] uppercase">+ Nova Ponuda</button>
               </div>
               <div className="grid gap-6">
                 {(profile.offers || []).map(offer => (
-                  <div key={offer.id} onClick={() => setEditingItem({ type: 'offers', id: offer.id, data: offer })} className="bg-gray-50 p-6 rounded-[2rem] border border-transparent hover:bg-white hover:shadow-xl transition-all cursor-pointer group">
+                  <div key={offer.id} onClick={() => setEditingItem({ type: 'offers', id: offer.id, data: offer })} className="bg-gray-50 p-6 rounded-[2rem] border border-transparent hover:bg-white hover:shadow-xl transition-all cursor-pointer">
                     <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-black text-gray-900 group-hover:text-indigo-600">{offer.title}</h4>
+                      <h4 className="font-black text-gray-900">{offer.title}</h4>
                       <span className="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-[10px] font-black">{offer.discount}</span>
                     </div>
                     <p className="text-xs text-gray-500">{offer.description}</p>
                   </div>
                 ))}
-                {(!profile.offers || profile.offers.length === 0) && <div className="py-20 text-center bg-gray-50 rounded-[2rem] text-gray-400 font-bold uppercase text-[10px]">Nema aktivnih ponuda</div>}
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'events' && (
-            <div className="space-y-10">
-              <div className="flex justify-between items-center">
-                <h3 className="text-xl font-black text-gray-900 uppercase">Događaji</h3>
-                <button onClick={() => setEditingItem({ type: 'events', data: { title: '', description: '', date: '' } })} className="bg-indigo-600 text-white px-5 py-2 rounded-xl font-black text-[10px] uppercase">+ Novi Događaj</button>
-              </div>
-              <div className="grid gap-6">
-                {(profile.events || []).map(event => (
-                  <div key={event.id} onClick={() => setEditingItem({ type: 'events', id: event.id, data: event })} className="bg-white p-6 rounded-3xl border border-gray-100 flex gap-6 items-center hover:shadow-xl transition-all cursor-pointer group">
-                    <div className="bg-indigo-50 text-indigo-600 w-16 h-16 flex-shrink-0 flex items-center justify-center rounded-2xl font-black text-[10px] uppercase p-2 text-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                      {event.date}
-                    </div>
-                    <div>
-                      <h4 className="font-black text-gray-900 mb-1 group-hover:text-indigo-600">{event.title}</h4>
-                      <p className="text-xs text-gray-500 line-clamp-2">{event.description}</p>
-                    </div>
-                  </div>
-                ))}
-                {(!profile.events || profile.events.length === 0) && <div className="py-20 text-center bg-gray-50 rounded-[2rem] text-gray-400 font-bold uppercase text-[10px]">Nema najavljenih događaja</div>}
               </div>
             </div>
           )}
@@ -414,43 +386,33 @@ const Dashboard: React.FC<DashboardProps> = ({
           {activeTab === 'gallery' && (
             <div className="space-y-10">
               <div className="flex justify-between items-center">
-                <h3 className="text-xl font-black text-gray-900 uppercase">Galerija Slika</h3>
+                <h3 className="text-xl font-black text-gray-900 uppercase">Galerija</h3>
                 <div>
-                  <button onClick={() => galleryInputRef.current?.click()} className="bg-indigo-600 text-white px-5 py-2 rounded-xl font-black text-[10px] uppercase">+ Dodaj slike</button>
+                  <button onClick={() => galleryInputRef.current?.click()} className="bg-indigo-600 text-white px-5 py-2 rounded-xl font-black text-[10px] uppercase">+ Slike</button>
                   <input type="file" ref={galleryInputRef} onChange={handleGalleryUpload} multiple className="hidden" accept="image/*" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {(profile.gallery || []).map((img, idx) => (
-                  <div key={idx} className="relative group aspect-square rounded-[2rem] overflow-hidden shadow-md">
-                    <img src={img} className="w-full h-full object-cover" loading="lazy" />
-                    <button 
-                      onClick={() => deleteGalleryImage(idx)}
-                      className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all shadow-lg hover:bg-red-600"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
+                  <div key={idx} className="relative group aspect-square rounded-3xl overflow-hidden shadow-sm">
+                    <img src={img} className="w-full h-full object-cover" />
+                    <button onClick={() => deleteGalleryImage(idx)} className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">X</button>
                   </div>
                 ))}
-                {(!profile.gallery || profile.gallery.length === 0) && (
-                  <div className="col-span-full py-20 text-center bg-gray-50 rounded-[2rem] text-gray-400 font-bold uppercase text-[10px]">Galerija je prazna</div>
-                )}
               </div>
             </div>
           )}
           
           {activeTab === 'billing' && (
             <div className="bg-indigo-600 rounded-[2.5rem] p-10 text-white shadow-2xl">
-              <p className="text-indigo-200 text-[10px] font-black uppercase tracking-widest mb-1">Trenutni Plan</p>
+              <p className="text-indigo-200 text-[10px] font-black uppercase tracking-widest mb-1">Plan</p>
               <h2 className="text-3xl font-black mb-6">{activePlanName}</h2>
               <div className="flex justify-between items-end">
                 <div>
-                  <p className="text-indigo-200 text-[10px] font-black uppercase mb-1">Sledeća Naplata</p>
+                  <p className="text-indigo-200 text-[10px] font-black uppercase mb-1">Naplata</p>
                   <p className="text-xl font-black">{profile.subscription?.nextBillingDate}</p>
                 </div>
-                <button onClick={() => onViewChange('PRICING')} className="bg-white text-indigo-600 px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-50 transition-all">Promeni Plan</button>
+                <button onClick={() => onViewChange('PRICING')} className="bg-white text-indigo-600 px-8 py-3 rounded-xl font-black text-xs uppercase hover:bg-indigo-50">Promeni</button>
               </div>
             </div>
           )}
